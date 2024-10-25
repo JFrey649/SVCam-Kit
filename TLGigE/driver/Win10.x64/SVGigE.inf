@@ -1,0 +1,101 @@
+;-------------------------------------------------------------------------
+; SVGigE.INF -- NDIS Usermode I/O Driver (SVCam GigE FilterDriver)
+;
+; Copyright (c) 2010-2017 SVS-VISTEK GmbH.  All rights reserved.
+;-------------------------------------------------------------------------
+[version]
+Signature   = "$Windows NT$"
+Class     	= NetService
+ClassGUID  	= {4D36E974-E325-11CE-BFC1-08002BE10318}
+Provider    = %SVS%
+DriverVer	  = 04/07/2022,1.5.5.2
+CatalogFile = SVGigE.cat
+DriverVer = 07/04/2022,10.27.2.867
+
+[Manufacturer]
+%SVS%=SVS-VISTEK,NTx86,NTia64,NTamd64
+
+[SVS-VISTEK.NTx86]
+%SVGigE_Desc%=Install, SV_SVGigE
+
+[SVS-VISTEK.NTia64]
+%SVGigE_Desc%=Install, SV_SVGigE
+
+[SVS-VISTEK.NTamd64]
+%SVGigE_Desc%=Install, SV_SVGigE
+ 
+;-------------------------------------------------------------------------
+; Installation Section
+;-------------------------------------------------------------------------
+[Install]
+AddReg=Inst_Ndi
+Characteristics=0x40000
+NetCfgInstanceId="{647A1A03-9F05-448f-8AC0-8818A043F46F}"
+Copyfiles = SVGigE.copyfiles.sys
+
+[SourceDisksNames]
+1=%SVGigE_Desc%,"",,
+
+[SourceDisksFiles]
+SVGigE.sys=1
+
+[DestinationDirs]
+DefaultDestDir=12
+SVGigE.copyfiles.sys=12
+
+[SVGigE.copyfiles.sys]
+SVGigE.sys,,,2
+
+
+;-------------------------------------------------------------------------
+; Ndi installation support
+;-------------------------------------------------------------------------
+[Inst_Ndi]
+HKR, Ndi,Service,,"SVGigE"
+HKR, Ndi,CoServices,0x00010000,"SVGigE"
+HKR, Ndi,HelpText,,%SVGigE_HelpText%
+HKR, Ndi,FilterClass,, compression
+HKR, Ndi,FilterType,0x00010001,0x00000002
+HKR, Ndi\Interfaces,UpperRange,,"noupper"
+HKR, Ndi\Interfaces,LowerRange,,"nolower"
+HKR, Ndi\Interfaces, FilterMediaTypes,,"ethernet"
+HKR, Ndi,FilterRunType, 0x00010001, 1 ;this filter must run before any protocol can bind to the below miniport 
+
+;-------------------------------------------------------------------------
+; Service installation support
+;-------------------------------------------------------------------------
+[Install.Services]
+AddService=SVGigE,,SVGigE_Service_Inst
+
+[SVGigE_Service_Inst]
+DisplayName     = %SVGigE_Desc%
+ServiceType     = 1 ;SERVICE_KERNEL_DRIVER
+StartType       = 1 ;SERVICE_SYSTEM_START
+ErrorControl    = 1 ;SERVICE_ERROR_NORMAL
+ServiceBinary   = %12%\SVGigE.sys
+LoadOrderGroup  = NDIS
+Description     = %SVGigE_Desc%
+AddReg          = Common.Params.reg
+
+[Install.Remove.Services]
+DelService=SVGigE,0x200
+
+[Common.Params.reg]
+
+HKR, FilterDriverParams\DriverParam, 		ParamDesc, 	, "Driverparam for FilterDriver"
+HKR, FilterDriverParams\DriverParam, 		default, 	, "5"
+HKR, FilterDriverParams\DriverParam, 		type, 		, "int"
+
+HKR, FilterAdapterParams\AdapterParam, 		ParamDesc, 	, "Adapterparam for FilterDriver"
+HKR, FilterAdapterParams\AdapterParam, 		default, 	, "10"
+HKR, FilterAdapterParams\AdapterParam, 		type, 		, "int"
+
+[Strings]
+SVS = "SVS-VISTEK GmbH"
+SVGigE_Desc = "SVGigE FilterDriver 1.5.5.2"
+SVGigE_HelpText = "SVGigE FilterDriver"
+
+
+
+
+
